@@ -168,23 +168,21 @@ func (w prioritierWrapper) Priority() int64 {
 }
 
 func (c *TimeoutChan) push(in Deadliner) {
-	func() {
-		c.Lock()
-		defer c.Unlock()
-		if c.pq.Len() == 0 {
-			defer func() { c.resumePop <- nil }()
-		} else {
-			if in.Deadline().Before(c.pq.Peek().(Deadliner).Deadline()) {
-				// Most recent deadline changed, send reschedule notice
-				defer func() {
-					close(c.reschedule)
-					c.reschedule = make(chan interface{})
-				}()
-			}
+	c.Lock()
+	defer c.Unlock()
+	if c.pq.Len() == 0 {
+		defer func() { c.resumePop <- nil }()
+	} else {
+		if in.Deadline().Before(c.pq.Peek().(Deadliner).Deadline()) {
+			// Most recent deadline changed, send reschedule notice
+			defer func() {
+				close(c.reschedule)
+				c.reschedule = make(chan interface{})
+			}()
 		}
-		heap.Push(c.pq, prioritierWrapper{in})
-		c.pushed++
-	}()
+	}
+	heap.Push(c.pq, prioritierWrapper{in})
+	c.pushed++
 }
 
 func (c *TimeoutChan) pop() Deadliner {
