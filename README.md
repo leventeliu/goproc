@@ -1,6 +1,6 @@
 # goproc
 
-goproc is a golang module containing components for process control.
+goproc is a golang module containing components for goroutine and timer control.
 
 ## Basic Components
 
