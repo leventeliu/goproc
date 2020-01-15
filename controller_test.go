@@ -41,7 +41,7 @@ func TestBackgroundController(t *testing.T) {
 		Convey("Test passing value", func() {
 			defer ctrl.WaitExit()
 			ctrl.WithDeadline(time.Now().Add(3*time.Second)).
-				WithValue(hangingAroundKey1, "Let play!").
+				WithValue(hangingAroundKey1, "Let's play!").
 				GoBackground(hangingAround)
 		})
 		Convey("Test passing value with anonymous key", func() {

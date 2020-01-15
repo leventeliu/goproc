@@ -43,7 +43,7 @@ type TimeoutChan struct {
 	reschedule chan interface{}
 	closePush  chan interface{}
 
-	sync.RWMutex
+	mu      *sync.RWMutex
 	pq      *PriorityQueue
 	pushed  int
 	popped  int
@@ -74,6 +74,7 @@ func NewTimeoutChan(ctx context.Context, resolution time.Duration, limit int) *T
 		reschedule: make(chan interface{}),
 		closePush:  make(chan interface{}),
 
+		mu:      &sync.RWMutex{},
 		pq:      NewPriorityQueue(false, size),
 		pushed:  0,
 		popped:  0,
@@ -95,8 +96,8 @@ func (c *TimeoutChan) Push(in Deadliner) {
 
 // Clear clears buffered Deadliners in TimeoutChan.
 func (c *TimeoutChan) Clear() int {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.pushCtrl.Shutdown()
 	c.popCtrl.Shutdown()
 	l := c.pq.Clear()
@@ -138,8 +139,8 @@ func (c *TimeoutChan) Shutdown() {
 
 // Stat returns TimeoutChan statistics.
 func (c *TimeoutChan) Stat() TimeoutChanStats {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return TimeoutChanStats{
 		Pushed:  c.pushed,
 		Popped:  c.popped,
@@ -148,14 +149,14 @@ func (c *TimeoutChan) Stat() TimeoutChanStats {
 }
 
 func (c *TimeoutChan) len() int {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.pq.Len()
 }
 
 func (c *TimeoutChan) peek() (<-chan interface{}, time.Duration) {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.reschedule, c.pq.Peek().(Deadliner).Deadline().Sub(time.Now())
 }
 
@@ -168,8 +169,8 @@ func (w prioritierWrapper) Priority() int64 {
 }
 
 func (c *TimeoutChan) push(in Deadliner) {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.pq.Len() == 0 {
 		defer func() { c.resumePop <- nil }()
 	} else {
@@ -186,8 +187,8 @@ func (c *TimeoutChan) push(in Deadliner) {
 }
 
 func (c *TimeoutChan) pop() Deadliner {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.limit > 0 && c.pq.Len() == c.limit {
 		defer func() { c.resumePush <- nil }() // queue is not full, resume
 	}
