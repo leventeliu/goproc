@@ -64,7 +64,7 @@ func TestUnlimitedTimeoutChan(t *testing.T) {
 			tc.Shutdown()
 			readCtrl.WaitExit()
 
-			stat := tc.Stat()
+			stat := tc.Stats()
 			fmt.Println(stat)
 			So(stat.Pushed, ShouldEqual, testRounds)
 			So(stat.Popped, ShouldBeLessThanOrEqualTo, testRounds-c)
@@ -75,7 +75,7 @@ func TestUnlimitedTimeoutChan(t *testing.T) {
 			tc.Shutdown()
 			readCtrl.WaitExit()
 
-			stat := tc.Stat()
+			stat := tc.Stats()
 			fmt.Println(stat)
 			So(stat.Pushed, ShouldEqual, testRounds)
 			So(stat.Popped, ShouldBeLessThanOrEqualTo, testRounds)
@@ -86,7 +86,7 @@ func TestUnlimitedTimeoutChan(t *testing.T) {
 			tc.Close()
 			readCtrl.WaitExit()
 
-			stat := tc.Stat()
+			stat := tc.Stats()
 			fmt.Println(stat)
 			So(stat.Pushed, ShouldEqual, testRounds)
 			So(stat.Popped, ShouldEqual, testRounds)
@@ -139,7 +139,7 @@ func TestLimitedTimeoutChan(t *testing.T) {
 			tc.Shutdown()
 			readCtrl.WaitExit()
 
-			stat := tc.Stat()
+			stat := tc.Stats()
 			fmt.Println(stat)
 			So(stat.Pushed, ShouldEqual, testRounds)
 			So(stat.Popped, ShouldBeLessThanOrEqualTo, testRounds-c)
@@ -150,7 +150,7 @@ func TestLimitedTimeoutChan(t *testing.T) {
 			tc.Shutdown()
 			readCtrl.WaitExit()
 
-			stat := tc.Stat()
+			stat := tc.Stats()
 			fmt.Println(stat)
 			So(stat.Pushed, ShouldEqual, testRounds)
 			So(stat.Popped, ShouldBeLessThanOrEqualTo, testRounds)
@@ -161,7 +161,7 @@ func TestLimitedTimeoutChan(t *testing.T) {
 			tc.Close()
 			readCtrl.WaitExit()
 
-			stat := tc.Stat()
+			stat := tc.Stats()
 			fmt.Println(stat)
 			So(stat.Pushed, ShouldEqual, testRounds)
 			So(stat.Popped, ShouldEqual, testRounds)
@@ -278,7 +278,7 @@ func TestTimeoutChanChaos(t *testing.T) {
 		tc.Close()
 		readCtrl.WaitExit()
 
-		stat := tc.Stat()
+		stat := tc.Stats()
 		fmt.Println(stat)
 		So(stat.Pushed, ShouldEqual, testConcurrency*testRounds)
 		So(stat.Popped, ShouldEqual, testConcurrency*testRounds)

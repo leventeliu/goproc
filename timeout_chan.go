@@ -13,7 +13,7 @@ type Deadliner interface {
 	Deadline() time.Time
 }
 
-// TimeoutChanStats contains timeout chan statistics returned from TimeoutChan.Stat().
+// TimeoutChanStats contains timeout chan statistics returned from TimeoutChan.Stats().
 type TimeoutChanStats struct {
 	Pushed  int
 	Popped  int
@@ -137,8 +137,8 @@ func (c *TimeoutChan) Shutdown() {
 	close(c.reschedule)
 }
 
-// Stat returns TimeoutChan statistics.
-func (c *TimeoutChan) Stat() TimeoutChanStats {
+// Stats returns TimeoutChan statistics.
+func (c *TimeoutChan) Stats() TimeoutChanStats {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return TimeoutChanStats{

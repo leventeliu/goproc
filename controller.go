@@ -9,7 +9,7 @@ import (
 // BackgroundFunc defines the background function type for BackgroundController.
 type BackgroundFunc func(ctx context.Context)
 
-// BackgroundFunc defines the recover handler function type for BackgroundController.
+// RecoverHandleFunc defines the recover handler function type for BackgroundController.
 type RecoverHandleFunc func(r interface{})
 
 // BackgroundController implements a simple controller of background goroutines, which can cancel or wait for all
