@@ -33,7 +33,7 @@ func NewBackgroundController(ctx context.Context, name string) *BackgroundContro
 }
 
 // GoBackground initiates a new goroutine for f and gains control on the goroutine through a context.Context argument.
-func (c *BackgroundController) GoBackground(f BackgroundFunc) {
+func (c *BackgroundController) GoBackground(f BackgroundFunc) *BackgroundController {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
 	}
@@ -42,12 +42,13 @@ func (c *BackgroundController) GoBackground(f BackgroundFunc) {
 		defer c.wg.Done()
 		f(c.ctx)
 	}()
+	return c
 }
 
 // GoRecoverableBackground initiates a new goroutine for f and gains control on the goroutine through a context.Context
 // argument.
 // Any panic from f will be captured and handled by h.
-func (c *BackgroundController) GoRecoverableBackground(f BackgroundFunc, h RecoverHandleFunc) {
+func (c *BackgroundController) GoRecoverableBackground(f BackgroundFunc, h RecoverHandleFunc) *BackgroundController {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
 	}
@@ -61,6 +62,7 @@ func (c *BackgroundController) GoRecoverableBackground(f BackgroundFunc, h Recov
 		}()
 		f(c.ctx)
 	}()
+	return c
 }
 
 // WithValue returns a copy of c with key->value added to internal context object.
