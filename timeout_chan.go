@@ -26,7 +26,8 @@ func (s TimeoutChanStats) String() string {
 }
 
 // TimeoutChan is a type representing a channel for Deadliner objects.
-// TimeoutChan accepts Deadliner from TimeoutChan.In and sends Deadliner to Timeout.Out when its deadline is reached.
+// TimeoutChan accepts Deadliner from TimeoutChan.In and sends Deadliner to Timeout.Out when its
+// deadline is reached.
 type TimeoutChan struct {
 	In  chan<- Deadliner
 	Out <-chan Deadliner
@@ -50,7 +51,8 @@ type TimeoutChan struct {
 	cleared int
 }
 
-// NewTimeoutChan creates a new TimeoutChan. With 0 limit an unlimited timeout chan will be returned.
+// NewTimeoutChan creates a new TimeoutChan. With 0 limit an unlimited timeout chan will be
+// returned.
 func NewTimeoutChan(ctx context.Context, resolution time.Duration, limit int) *TimeoutChan {
 	size := limit
 	if limit == 0 {
@@ -85,7 +87,8 @@ func NewTimeoutChan(ctx context.Context, resolution time.Duration, limit int) *T
 	return tc
 }
 
-// Push is an alias of TimeoutChan.In <- (in Deadliner), but bypasses background push process for unlimited TimeoutChan.
+// Push is an alias of TimeoutChan.In <- (in Deadliner), but bypasses background push process for
+// unlimited TimeoutChan.
 func (c *TimeoutChan) Push(in Deadliner) {
 	if c.limit == 0 {
 		c.push(in)
@@ -112,8 +115,8 @@ func (c *TimeoutChan) Clear() int {
 	return l
 }
 
-// Close closes TimeoutChan and waits until all buffered Deadliners in TimeoutChan to be sent and read in
-// TimeoutChan.Out before it returns.
+// Close closes TimeoutChan and waits until all buffered Deadliners in TimeoutChan to be sent and
+// read in TimeoutChan.Out before it returns.
 func (c *TimeoutChan) Close() {
 	close(c.in)
 	c.pushCtrl.WaitExit()
@@ -125,7 +128,8 @@ func (c *TimeoutChan) Close() {
 	close(c.reschedule)
 }
 
-// Close closes TimeoutChan and returns immediately, any buffered Deadliners in TimeoutChan will be ignored.
+// Close closes TimeoutChan and returns immediately, any buffered Deadliners in TimeoutChan will
+// be ignored.
 func (c *TimeoutChan) Shutdown() {
 	close(c.in)
 	c.pushCtrl.Shutdown()

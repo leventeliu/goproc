@@ -12,8 +12,8 @@ type BackgroundFunc func(ctx context.Context)
 // RecoverHandleFunc defines the recover handler function type for BackgroundController.
 type RecoverHandleFunc func(r interface{})
 
-// BackgroundController implements a simple controller of background goroutines, which can cancel or wait for all
-// under control goroutines to return.
+// BackgroundController implements a simple controller of background goroutines, which can cancel
+// or wait for all under control goroutines to return.
 type BackgroundController struct {
 	name   string
 	ctx    context.Context
@@ -32,7 +32,8 @@ func NewBackgroundController(ctx context.Context, name string) *BackgroundContro
 	}
 }
 
-// GoBackground initiates a new goroutine for f and gains control on the goroutine through a context.Context argument.
+// GoBackground initiates a new goroutine for f and gains control on the goroutine through
+// a context.Context argument.
 func (c *BackgroundController) GoBackground(f BackgroundFunc) *BackgroundController {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
@@ -45,8 +46,8 @@ func (c *BackgroundController) GoBackground(f BackgroundFunc) *BackgroundControl
 	return c
 }
 
-// GoRecoverableBackground initiates a new goroutine for f and gains control on the goroutine through a context.Context
-// argument.
+// GoRecoverableBackground initiates a new goroutine for f and gains control on the goroutine
+// through a context.Context argument.
 // Any panic from f will be captured and handled by h.
 func (c *BackgroundController) GoRecoverableBackground(f BackgroundFunc, h RecoverHandleFunc) *BackgroundController {
 	if err := c.ctx.Err(); err != nil {
@@ -65,12 +66,12 @@ func (c *BackgroundController) GoRecoverableBackground(f BackgroundFunc, h Recov
 	return c
 }
 
-// WithValue returns a copy of c with key->value added to internal context object.
+// WithValue returns a copy of c with key->value added to internal context object, which will be
+// passed to the BackgroundFunc functions in subsequent c.Go* calls.
 // For good practice of context key-value usage, reference context package docs.
 //
-// Note that you should not treat it as a child BackgroundController - cancelling the returned BackgroundController
-// would actually cancel all goroutines controlled by c - it has the same effect as cancelling c.
-// This is just a intended, simplified design to allow internal context manipulation, and I may reconsider this later.
+// Note that unlike a child context, the returned object still holds the control of c, which means
+// cancelling the returned BackgroundController would actually cancel all goroutines started by c.
 func (c *BackgroundController) WithValue(key interface{}, value interface{}) *BackgroundController {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
@@ -83,11 +84,11 @@ func (c *BackgroundController) WithValue(key interface{}, value interface{}) *Ba
 	}
 }
 
-// WithDeadline returns a copy of c with deadline set to internal context object.
+// WithDeadline returns a copy of c with deadline set to internal context object, which will be
+// passed to the BackgroundFunc functions in subsequent c.Go* calls.
 //
-// Note that you should not treat it as a child BackgroundController - cancelling the returned BackgroundController
-// would actually cancel all goroutines controlled by c - it has the same effect as cancelling c.
-// This is just a intended, simplified design to allow internal context manipulation, and I may reconsider this later.
+// Note that unlike a child context, the returned object still holds the control of c, which means
+// cancelling the returned BackgroundController would actually cancel all goroutines started by c.
 func (c *BackgroundController) WithDeadline(deadline time.Time) *BackgroundController {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
@@ -101,11 +102,11 @@ func (c *BackgroundController) WithDeadline(deadline time.Time) *BackgroundContr
 	}
 }
 
-// WithTimeout returns a copy of c with timeout set to internal context object.
+// WithTimeout returns a copy of c with timeout set to internal context object, which will be
+// passed to the BackgroundFunc functions in subsequent c.Go* calls.
 //
-// Note that you should not treat it as a child BackgroundController - cancelling the returned BackgroundController
-// would actually cancel all goroutines controlled by c - it has the same effect as cancelling c.
-// This is just a intended, simplified design to allow internal context manipulation, and I may reconsider this later.
+// Note that unlike a child context, the returned object still holds the control of c, which means
+// cancelling the returned BackgroundController would actually cancel all goroutines started by c.
 func (c *BackgroundController) WithTimeout(timeout time.Duration) *BackgroundController {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
@@ -131,8 +132,8 @@ func (c *BackgroundController) WaitExit() {
 	c.wg.Wait()
 }
 
-// Die tells whether the BackgroundController is already cancelled - it always returns true after the first time
-// BackgroundController.Shutdown() or BackgroundController.WaitExit() is called.
+// Die tells whether c is already cancelled - it always returns true after the first time
+// c.Shutdown() or c.WaitExit() is called.
 func (c *BackgroundController) Die() bool {
 	return c.ctx.Err() != nil
 }
