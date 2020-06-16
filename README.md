@@ -1,6 +1,6 @@
 # goproc
 
-[![GoDoc](https://godoc.org/github.com/leventeliu/goproc?status.svg)](https://godoc.org/github.com/leventeliu/goproc)
+[![GoDoc](https://godoc.org/github.com/leventeliu/goproc?status.svg)](https://godoc.org/github.com/leventeliu/goproc) [![Go Report Card](https://goreportcard.com/badge/github.com/leventeliu/goproc)](https://goreportcard.com/report/github.com/leventeliu/goproc)
 
 goproc is a golang module containing components for goroutine and timer control.
 
