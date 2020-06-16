@@ -128,7 +128,7 @@ func (c *TimeoutChan) Close() {
 	close(c.reschedule)
 }
 
-// Close closes TimeoutChan and returns immediately, any buffered Deadliners in TimeoutChan will
+// Shutdown closes TimeoutChan and returns immediately, any buffered Deadliners in TimeoutChan will
 // be ignored.
 func (c *TimeoutChan) Shutdown() {
 	close(c.in)

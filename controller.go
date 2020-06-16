@@ -126,7 +126,7 @@ func (c *BackgroundController) Shutdown() {
 	c.wg.Wait()
 }
 
-// Shutdown waits for any goroutine under control.
+// WaitExit waits for any goroutine under control.
 func (c *BackgroundController) WaitExit() {
 	defer c.cancel()
 	c.wg.Wait()

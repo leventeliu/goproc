@@ -1,5 +1,7 @@
 # goproc
 
+[![GoDoc](https://godoc.org/github.com/leventeliu/goproc?status.svg)](https://godoc.org/github.com/leventeliu/goproc)
+
 goproc is a golang module containing components for goroutine and timer control.
 
 ## Basic Components
@@ -20,5 +22,5 @@ The underlying implementation of TimeoutChan timer scheduling is similar to the 
 - Deadliner management and timeout scheduling
 - Guaranteed out-order of deadliners in TimeoutChan buffer
   - While working with limited TimeoutChan, the order is only guaranteed in the limited buffer range
-  
+
 See [example test cases](timeout_chan_test.go) for details.
