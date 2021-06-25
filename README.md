@@ -6,7 +6,7 @@ goproc is a golang module containing components for goroutine and timer control.
 
 ## Basic Components
 
-### BackgroundController
+### Controller
 
 A simple controller of background goroutines, which can cancel or wait for all under control goroutines to return.
 
