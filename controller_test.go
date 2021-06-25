@@ -29,26 +29,26 @@ func hangingAround(ctx context.Context) {
 
 func TestBackgroundController(t *testing.T) {
 	Convey("With test controller created", t, func(c C) {
-		ctrl := NewBackgroundController(context.Background(), t.Name())
+		ctrl := NewController(context.Background(), t.Name())
 		Convey("Test wait exit", func() {
 			ctrl.WithTimeout(3 * time.Second).
-				GoBackground(hangingAround).
-				WaitExit()
+				Go(hangingAround).
+				Wait()
 		})
 		Convey("Test shutdown", func() {
-			ctrl.GoBackground(hangingAround).Shutdown()
+			ctrl.Go(hangingAround).Shutdown()
 		})
 		Convey("Test passing value", func() {
 			ctrl.WithDeadline(time.Now().Add(3*time.Second)).
 				WithValue(hangingAroundKey1, "Let's play!").
-				GoBackground(hangingAround).
-				WaitExit()
+				Go(hangingAround).
+				Wait()
 		})
 		Convey("Test passing value with anonymous key", func() {
 			ctrl.WithTimeout(3*time.Second).
 				WithValue(&testKeyType{}, "panic").
-				GoBackground(hangingAround).
-				WaitExit() // should not receive key
+				Go(hangingAround).
+				Wait() // should not receive key
 		})
 	})
 }

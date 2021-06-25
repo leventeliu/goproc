@@ -34,10 +34,10 @@ func TestUnlimitedTimeoutChan(t *testing.T) {
 		const testRounds = 1000
 		var (
 			tc       = NewTimeoutChan(context.Background(), 100*time.Millisecond, 0)
-			readCtrl = NewBackgroundController(context.Background(), t.Name())
+			readCtrl = NewController(context.Background(), t.Name())
 			outList  []Deadliner
 		)
-		readCtrl.GoBackground(func(ctx context.Context) {
+		readCtrl.Go(func(ctx context.Context) {
 			for item := range tc.Out {
 				actual := time.Now()
 				outList = append(outList, item)
@@ -62,7 +62,7 @@ func TestUnlimitedTimeoutChan(t *testing.T) {
 			time.Sleep(3 * time.Second)
 			c := tc.Clear()
 			tc.Shutdown()
-			readCtrl.WaitExit()
+			readCtrl.Wait()
 
 			stat := tc.Stats()
 			fmt.Println(stat)
@@ -73,7 +73,7 @@ func TestUnlimitedTimeoutChan(t *testing.T) {
 
 		Convey("Test shutdown timeout chan", func() {
 			tc.Shutdown()
-			readCtrl.WaitExit()
+			readCtrl.Wait()
 
 			stat := tc.Stats()
 			fmt.Println(stat)
@@ -84,7 +84,7 @@ func TestUnlimitedTimeoutChan(t *testing.T) {
 
 		Convey("Test wait exit timeout chan", func() {
 			tc.Close()
-			readCtrl.WaitExit()
+			readCtrl.Wait()
 
 			stat := tc.Stats()
 			fmt.Println(stat)
@@ -107,10 +107,10 @@ func TestLimitedTimeoutChan(t *testing.T) {
 		)
 		var (
 			tc       = NewTimeoutChan(context.Background(), 100*time.Millisecond, testLimit)
-			readCtrl = NewBackgroundController(context.Background(), t.Name())
+			readCtrl = NewController(context.Background(), t.Name())
 			outList  []Deadliner
 		)
-		readCtrl.GoBackground(func(ctx context.Context) {
+		readCtrl.Go(func(ctx context.Context) {
 			for item := range tc.Out {
 				actual := time.Now()
 				outList = append(outList, item)
@@ -137,7 +137,7 @@ func TestLimitedTimeoutChan(t *testing.T) {
 			time.Sleep(3 * time.Second)
 			c := tc.Clear()
 			tc.Shutdown()
-			readCtrl.WaitExit()
+			readCtrl.Wait()
 
 			stat := tc.Stats()
 			fmt.Println(stat)
@@ -148,7 +148,7 @@ func TestLimitedTimeoutChan(t *testing.T) {
 
 		Convey("Test shutdown timeout chan", func() {
 			tc.Shutdown()
-			readCtrl.WaitExit()
+			readCtrl.Wait()
 
 			stat := tc.Stats()
 			fmt.Println(stat)
@@ -159,7 +159,7 @@ func TestLimitedTimeoutChan(t *testing.T) {
 
 		Convey("Test wait exit timeout chan", func() {
 			tc.Close()
-			readCtrl.WaitExit()
+			readCtrl.Wait()
 
 			stat := tc.Stats()
 			fmt.Println(stat)
@@ -188,10 +188,10 @@ func TestTimeoutChanReschedule(t *testing.T) {
 	Convey("Test TimeoutChan reschedule", t, func(c C) {
 		var (
 			tc       = NewTimeoutChan(context.Background(), 100*time.Millisecond, 0)
-			readCtrl = NewBackgroundController(context.Background(), t.Name())
+			readCtrl = NewController(context.Background(), t.Name())
 			outList  []Deadliner
 		)
-		readCtrl.GoBackground(func(ctx context.Context) {
+		readCtrl.Go(func(ctx context.Context) {
 			for item := range tc.Out {
 				actual := time.Now()
 				outList = append(outList, item)
@@ -206,7 +206,7 @@ func TestTimeoutChanReschedule(t *testing.T) {
 		tc.In <- TestDeadliner{Time: time.Now().Add(4 * time.Second)}  // should trigger reschedule to reset spin time to 2 second
 		tc.In <- TestDeadliner{Time: time.Now().Add(1 * time.Second)}  // should trigger reschedule to reset spin time to 0.5 second
 		tc.Close()
-		readCtrl.WaitExit()
+		readCtrl.Wait()
 
 		for i := 1; i < len(outList); i++ {
 			So(outList[i-1].Deadline(), ShouldHappenOnOrBefore, outList[i].Deadline())
@@ -245,10 +245,10 @@ func TestTimeoutChanChaos(t *testing.T) {
 		)
 		var (
 			tc       = NewTimeoutChan(context.Background(), 100*time.Millisecond, 0)
-			readCtrl = NewBackgroundController(context.Background(), t.Name()+"-R")
+			readCtrl = NewController(context.Background(), t.Name()+"-R")
 			outList  []Deadliner
 		)
-		readCtrl.GoBackground(func(ctx context.Context) {
+		readCtrl.Go(func(ctx context.Context) {
 			for item := range tc.Out {
 				actual := time.Now()
 				outList = append(outList, item)
@@ -263,9 +263,9 @@ func TestTimeoutChanChaos(t *testing.T) {
 			BaseDuration:      1 * time.Second,
 			RandDurationRange: 10 * time.Second,
 		}
-		writeCtrl := NewBackgroundController(context.Background(), t.Name()+"-W")
+		writeCtrl := NewController(context.Background(), t.Name()+"-W")
 		for i := 0; i < 100; i++ {
-			writeCtrl.GoBackground(func(ctx context.Context) {
+			writeCtrl.Go(func(ctx context.Context) {
 				for i := 0; i < 100; i++ {
 					time.Sleep(time.Duration(rand.Int63()) % (1 * time.Second))
 					in := factory.NewRandTestDeadliner()
@@ -274,9 +274,9 @@ func TestTimeoutChanChaos(t *testing.T) {
 				}
 			})
 		}
-		writeCtrl.WaitExit()
+		writeCtrl.Wait()
 		tc.Close()
-		readCtrl.WaitExit()
+		readCtrl.Wait()
 
 		stat := tc.Stats()
 		fmt.Println(stat)

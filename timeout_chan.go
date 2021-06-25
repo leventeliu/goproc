@@ -33,8 +33,8 @@ type TimeoutChan struct {
 	Out <-chan Deadliner
 
 	ctx        context.Context
-	pushCtrl   *BackgroundController
-	popCtrl    *BackgroundController
+	pushCtrl   *Controller
+	popCtrl    *Controller
 	resolution time.Duration
 	limit      int
 	in         chan Deadliner
@@ -65,8 +65,8 @@ func NewTimeoutChan(ctx context.Context, resolution time.Duration, limit int) *T
 		Out: out,
 
 		ctx:        ctx,
-		pushCtrl:   NewBackgroundController(ctx, "TimeoutChan Push"),
-		popCtrl:    NewBackgroundController(ctx, "TimeoutChan Pop"),
+		pushCtrl:   NewController(ctx, "TimeoutChan Push"),
+		popCtrl:    NewController(ctx, "TimeoutChan Pop"),
 		resolution: resolution,
 		limit:      limit,
 		in:         in,
@@ -82,8 +82,8 @@ func NewTimeoutChan(ctx context.Context, resolution time.Duration, limit int) *T
 		popped:  0,
 		cleared: 0,
 	}
-	tc.popCtrl.GoBackground(tc.popProcess)
-	tc.pushCtrl.GoBackground(tc.pushProcess)
+	tc.popCtrl.Go(tc.popProcess)
+	tc.pushCtrl.Go(tc.pushProcess)
 	return tc
 }
 
@@ -108,10 +108,10 @@ func (c *TimeoutChan) Clear() int {
 		defer func() { c.resumePush <- nil }() // queue is not full, resume
 	}
 	c.cleared += l
-	c.pushCtrl = NewBackgroundController(c.ctx, "TimeoutChan Push")
-	c.popCtrl = NewBackgroundController(c.ctx, "TimeoutChan Pop")
-	c.popCtrl.GoBackground(c.popProcess)
-	c.pushCtrl.GoBackground(c.pushProcess)
+	c.pushCtrl = NewController(c.ctx, "TimeoutChan Push")
+	c.popCtrl = NewController(c.ctx, "TimeoutChan Pop")
+	c.popCtrl.Go(c.popProcess)
+	c.pushCtrl.Go(c.pushProcess)
 	return l
 }
 
@@ -119,9 +119,9 @@ func (c *TimeoutChan) Clear() int {
 // read in TimeoutChan.Out before it returns.
 func (c *TimeoutChan) Close() {
 	close(c.in)
-	c.pushCtrl.WaitExit()
+	c.pushCtrl.Wait()
 	close(c.closePush)
-	c.popCtrl.WaitExit()
+	c.popCtrl.Wait()
 	close(c.out)
 	close(c.resumePush)
 	close(c.resumePop)
