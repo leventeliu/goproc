@@ -34,21 +34,25 @@ func TestBackgroundController(t *testing.T) {
 			ctrl.WithTimeout(3 * time.Second).
 				Go(hangingAround).
 				Wait()
+			So(ctrl.Die(), ShouldBeTrue)
 		})
 		Convey("Test shutdown", func() {
 			ctrl.Go(hangingAround).Shutdown()
+			So(ctrl.Die(), ShouldBeTrue)
 		})
 		Convey("Test passing value", func() {
 			ctrl.WithDeadline(time.Now().Add(3*time.Second)).
 				WithValue(hangingAroundKey1, "Let's play!").
 				Go(hangingAround).
 				Wait()
+			So(ctrl.Die(), ShouldBeTrue)
 		})
 		Convey("Test passing value with anonymous key", func() {
 			ctrl.WithTimeout(3*time.Second).
 				WithValue(&testKeyType{}, "panic").
 				Go(hangingAround).
 				Wait() // should not receive key
+			So(ctrl.Die(), ShouldBeTrue)
 		})
 	})
 }

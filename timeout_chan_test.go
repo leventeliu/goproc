@@ -240,8 +240,8 @@ func TestTimeoutChanStarving(t *testing.T) {
 func TestTimeoutChanChaos(t *testing.T) {
 	Convey("Test chaos", t, func(c C) {
 		const (
-			testConcurrency = 100
-			testRounds      = 100
+			testConcurrency = 10
+			testRounds      = 10
 		)
 		var (
 			tc       = NewTimeoutChan(context.Background(), 100*time.Millisecond, 0)
@@ -264,9 +264,9 @@ func TestTimeoutChanChaos(t *testing.T) {
 			RandDurationRange: 10 * time.Second,
 		}
 		writeCtrl := NewController(context.Background(), t.Name()+"-W")
-		for i := 0; i < 100; i++ {
+		for i := 0; i < testConcurrency; i++ {
 			writeCtrl.Go(func(ctx context.Context) {
-				for i := 0; i < 100; i++ {
+				for i := 0; i < testRounds; i++ {
 					time.Sleep(time.Duration(rand.Int63()) % (1 * time.Second))
 					in := factory.NewRandTestDeadliner()
 					tc.In <- in

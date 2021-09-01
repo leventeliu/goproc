@@ -21,7 +21,7 @@ type Controller struct {
 	wg     *sync.WaitGroup
 }
 
-// NewController creates a new Controller.
+// NewController creates a new goproc Controller.
 func NewController(ctx context.Context, name string) *Controller {
 	child, cancel := context.WithCancel(ctx)
 	return &Controller{
@@ -32,7 +32,7 @@ func NewController(ctx context.Context, name string) *Controller {
 	}
 }
 
-// Go initiates a new goroutine for f and gains control on the goroutine through
+// Go initiates a new goroutine for g and gains control on the goroutine through
 // a context.Context argument.
 func (c *Controller) Go(g Goroutine) *Controller {
 	if err := c.ctx.Err(); err != nil {
@@ -46,9 +46,9 @@ func (c *Controller) Go(g Goroutine) *Controller {
 	return c
 }
 
-// GoWithRecover initiates a new goroutine for f and gains control on the goroutine
+// GoWithRecover initiates a new goroutine for g and gains control on the goroutine
 // through a context.Context argument.
-// Any panic from f will be captured and handled by h.
+// Any panic from g will be captured and handled by rf.
 func (c *Controller) GoWithRecover(g Goroutine, rf Recover) *Controller {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
@@ -93,12 +93,15 @@ func (c *Controller) WithDeadline(deadline time.Time) *Controller {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
 	}
-	var child, _ = context.WithDeadline(c.ctx, deadline)
+	var child, cancel = context.WithDeadline(c.ctx, deadline)
 	return &Controller{
-		name:   c.name,
-		ctx:    child,
-		cancel: c.cancel,
-		wg:     c.wg,
+		name: c.name,
+		ctx:  child,
+		cancel: func() {
+			cancel()
+			c.cancel()
+		},
+		wg: c.wg,
 	}
 }
 
@@ -111,12 +114,15 @@ func (c *Controller) WithTimeout(timeout time.Duration) *Controller {
 	if err := c.ctx.Err(); err != nil {
 		panic(err)
 	}
-	var child, _ = context.WithTimeout(c.ctx, timeout)
+	var child, cancel = context.WithTimeout(c.ctx, timeout)
 	return &Controller{
-		name:   c.name,
-		ctx:    child,
-		cancel: c.cancel,
-		wg:     c.wg,
+		name: c.name,
+		ctx:  child,
+		cancel: func() {
+			cancel()
+			c.cancel()
+		},
+		wg: c.wg,
 	}
 }
 
